@@ -1,7 +1,10 @@
 {
-  "version": "1.0.0",
-  "date": "09/11/2026",
+  "version": "2.0.0",
+  "date": "14/11/2026",
   "notes": [
-    "Nuovo sistema di aggiornamento: quando esce una nuova versione compaiono il tasto Aggiorna e un avviso con le novità"
+    "Nuova grafica con colori naturali, barra di ricerca sempre visibile e menù in basso su smartphone",
+    "Contenuti raddoppiati in ogni sezione e nuove sezioni Orto e giardino e Risparmio e autonomia",
+    "Rimedia AI in ogni scheda e sezione, con lo stesso sistema di Garden Manager (Gemini, Groq, OpenRouter, Claude e altri, con servizi di riserva)",
+    "Ricerca intelligente, ricerca inversa “Ho… cosa posso farne?”, profilo personale, cronologia e risposte AI salvabili nel quaderno"
   ]
 }
