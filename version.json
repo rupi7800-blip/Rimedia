@@ -1,7 +1,9 @@
 {
-  "version": "1.0.0",
-  "date": "09/11/2026",
+  "version": "1.0.1",
+  "date": "14/11/2026",
   "notes": [
-    "Nuovo sistema di aggiornamento: quando esce una nuova versione compaiono il tasto Aggiorna e un avviso con le novità"
+    "iPhone: la chiave del servizio AI viene salvata in modo più sicuro",
+    "Avviso se il browser non permette di salvare la chiave (navigazione privata)",
+    "Spiegazione per iPhone: Safari e app sulla schermata Home hanno memorie separate"
   ]
 }

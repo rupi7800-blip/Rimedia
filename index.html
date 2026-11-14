@@ -1054,8 +1054,17 @@ const PROV={
   openai:{n:"ChatGPT (a pagamento)",d:"L'API di OpenAI richiede credito prepagato: senza credito risponde 'limite o credito esaurito'. Per usarla gratis scegli Groq.",key:true,link:"https://platform.openai.com/api-keys",model:"gpt-5-mini",url:"https://api.openai.com/v1/chat/completions",list:"https://api.openai.com/v1/models",models:["gpt-5-mini","gpt-5-nano","gpt-4.1-mini","gpt-4o-mini"],pick:id=>/^gpt-(5|4\.1|4o)(-mini|-nano)?$/.test(id)},
   claude:{n:"Claude",d:"Disponibile quando apri l'app dentro Claude.",key:false,inClaude:true}
 };
-function aiCfg(){let c={};try{c=JSON.parse(localStorage.getItem("rimedia_ai")||"{}");}catch(e){}c.keys=c.keys||{};c.models=c.models||{};if(!c.prov)c.prov=sampleFn?"claude":(c.keys.groq?"groq":c.keys.gemini?"gemini":"groq");if(c.prov==="claude"&&!sampleFn)c.prov="pollinations";return c;}
-function aiSave(c){try{localStorage.setItem("rimedia_ai",JSON.stringify(c));}catch(e){}}
+/* Impostazioni AI (chiavi comprese): salvate nella memoria del browser. Se il browser non le
+   tiene (navigazione privata, memoria piena o bloccata) restano almeno per la sessione in aiMem
+   e l'utente viene avvisato invece di perderle in silenzio. */
+let aiMem=null,aiWarned=false;
+function aiStoreOk(){try{const k="rimedia_test";localStorage.setItem(k,"1");const ok=localStorage.getItem(k)==="1";localStorage.removeItem(k);return ok;}catch(e){return false;}}
+function aiCfg(){let c={};try{c=JSON.parse(localStorage.getItem("rimedia_ai")||"null")||(aiMem?JSON.parse(aiMem):{});}catch(e){c=aiMem?JSON.parse(aiMem):{};}c.keys=c.keys||{};c.models=c.models||{};if(!c.prov)c.prov=sampleFn?"claude":(c.keys.groq?"groq":c.keys.gemini?"gemini":"groq");if(c.prov==="claude"&&!sampleFn)c.prov="pollinations";return c;}
+function aiSave(c){const v=JSON.stringify(c);aiMem=v;let ok=false;try{localStorage.setItem("rimedia_ai",v);ok=localStorage.getItem("rimedia_ai")===v;}catch(e){}
+  if(!ok&&!aiWarned){aiWarned=true;toast("Attenzione: questo browser non salva la chiave (navigazione privata?). Andrà reinserita alla riapertura.");}
+  if(ok&&navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+function isStandalone(){return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;}
 function aiName(){const c=aiCfg();return PROV[c.prov].n;}
 let aiLast="";
 class AIError extends Error{constructor(code,msg){super(msg);this.code=code;}}
@@ -1245,6 +1254,8 @@ function provChips(){
   ${PROV[c.prov].key?`<div class="row" style="margin-top:8px"><input class="inp" id="aiKey" type="password" autocomplete="off" placeholder="${PROV[c.prov].optKey?"Chiave facoltativa":"Incolla la chiave API"}" value="${esc(c.keys[c.prov]||"")}"><button class="btn sm" data-a="savekey">Salva</button></div>
    <div class="aihint">${c.keys[c.prov]?"✅ Chiave salvata":"Nessuna chiave salvata"}</div>
    <div class="aihint"><a href="${PROV[c.prov].link}" target="_blank" rel="noopener">Prendi la chiave qui ↗</a> · La chiave resta solo in questo browser.</div>
+   ${aiStoreOk()?"":`<div class="aihint" style="color:#b3261e">⚠️ Questo browser non permette di salvare dati (navigazione privata o dati dei siti bloccati): la chiave si cancella quando chiudi l'app.</div>`}
+   ${isIOS()?`<div class="aihint">📱 Su iPhone Safari e l'icona sulla schermata Home hanno memorie separate: inserisci la chiave ${isStandalone()?"qui nell'app installata":"nell'app aperta dall'icona, se la usi da lì"}. Non usare la navigazione privata.</div>`:""}
    <details class="rmore"><summary>Modello (avanzato)</summary><div class="aihint">Lascia vuoto per la scelta automatica.</div><div class="row" style="margin-top:6px"><input class="inp" id="aiModel" placeholder="automatico" value="${esc(c.models[c.prov]||"")}"><button class="btn sm sec" data-a="savemodel">Salva</button></div></details>`:""}`;
 }
 function viewAIRecipes(){
@@ -1390,6 +1401,8 @@ $("#tStop").onclick=()=>{clearInterval(tInt);$("#timer").classList.remove("on");
 
 /* ================= AVVIO ================= */
 loadLocal();
+// chiede al browser di non cancellare i dati salvati (chiavi, dispensa, lista della spesa)
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});}catch(e){}
 sampleFn=undefined; // sconosciuto finché non risponde
 render();
 (async()=>{
@@ -1407,6 +1420,6 @@ render();
   }catch(e){}
 })();
 </script>
-<script src="aggiornamenti.js" data-version="1.0.0"></script>
+<script src="aggiornamenti.js" data-version="1.0.1"></script>
 </body>
 </html>
