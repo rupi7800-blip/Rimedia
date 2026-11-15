@@ -268,6 +268,7 @@ a.linkcard{display:block;text-decoration:none;color:inherit}
 <script src="contenuti/orto.js"></script>
 <script src="contenuti/risparmio.js"></script>
 <script src="js/mie-idee.js"></script>
+<script src="js/command-center.js"></script>
 <script>
 /* ================= DATI ================= */
 const STAPLES=["sale","pepe","olio","olio extravergine","acqua"];
@@ -934,7 +935,7 @@ V.profilo=()=>{
    <div style="margin-top:8px">${h.length?h.slice(0,40).map(x=>`<div class="hist"><span>${ic[x.type]||"•"} ${esc(x.t)}${x.ctx?` <small style="color:var(--muted)">· ${esc(x.ctx)}</small>`:""}</span><small style="color:var(--muted)">${new Date(x.d).toLocaleDateString("it-IT")}</small>${x.type!=="ai"?`<button class="btn sm sec" data-a="redo" data-k="${x.type}" data-v="${esc(x.t)}">Ripeti</button>`:""}</div>`).join(""):'<div class="aihint">Nessuna attività registrata.</div>'}</div>
    ${h.length?`<div class="acts"><button class="btn sm sec" data-a="clearhist">Cancella cronologia</button></div>`:""}</div>
   <div class="panel"><h3>I miei dati</h3><div class="aihint">Dispensa, spesa, piano, quaderno, profilo e cronologia. Le chiavi AI non sono incluse nel backup.</div>
-   <div class="acts"><button class="btn sm sec" data-a="export">⬇️ Esporta backup</button><label class="btn sm sec" style="cursor:pointer">⬆️ Importa backup<input type="file" id="impFile" accept="application/json,.json" hidden></label></div></div>`;
+   <div class="acts"><button class="btn sm sec" data-a="export">⬇️ Esporta backup</button><label class="btn sm sec" style="cursor:pointer">⬆️ Importa backup<input type="file" id="impFile" accept="application/json,.json" hidden></label></div></div>${window.RCC?RCC.pannello():""}`;
 };
 function addHist(e){if(S.prefs&&S.prefs.hist===false)return;S.hist=(S.hist||[]).filter(h=>!(h.type===e.type&&h.t===e.t));S.hist.unshift(Object.assign({d:Date.now()},e));S.hist=S.hist.slice(0,100);save();}
 
@@ -1595,6 +1596,7 @@ document.addEventListener("click",async e=>{
   const el=e.target.closest("[data-a]");if(!el)return;const a=el.dataset.a,id=el.dataset.id;
   if(a==="toggle"){el.closest(".card").classList.toggle("open");return;}
   if(mieClick(a,el,id))return;
+  if(window.RCC&&RCC.click(a))return;
   if(a==="fab"){openAI(ctxSection(cur()));return;}
   if(a==="askai"){openAI(ctxItem(id));return;}
   if(a==="askai-sec"){openAI(ctxSection(el.dataset.v));return;}
@@ -1709,6 +1711,6 @@ render();
   }catch(e){}
 })();
 </script>
-<script src="aggiornamenti.js" data-version="2.1.1"></script>
+<script src="aggiornamenti.js" data-version="2.2.0"></script>
 </body>
 </html>

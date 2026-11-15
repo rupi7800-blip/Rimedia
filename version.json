@@ -1,7 +1,7 @@
 {
-  "version": "2.1.1",
+  "version": "2.2.0",
   "date": "15/11/2026",
   "notes": [
-    "Il pulsante “Aggiungi la mia idea” ora è in home: scegli il tipo di scheda (ricetta, autoproduzione, riciclo, bricolage, orto, risparmio, tisana, cosa ne faccio o appunto) e scrivila o importala"
+    "Nuovo: collegamento con AI Command Center (Profilo → Command Center). L'agente può leggere dispensa, spesa, piano e preferiti e aggiungere prodotti alla spesa"
   ]
 }
