@@ -117,6 +117,7 @@ details.rmore,details.quick{margin-top:12px}details summary{cursor:pointer;color
 .tag.good{background:var(--sage-l);color:var(--forest);border-color:#CFDCC6}
 .tag.ai{background:var(--sage-l);color:var(--forest);border-color:#CFDCC6}
 .tag.mine{background:var(--earth-l);color:#5e4630;border-color:#E0CFB6}
+.mineHome{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.mineHome>div{flex:1;min-width:200px}.mineHome h3{margin-bottom:2px}
 .chips.emo .chip{font-size:20px;padding:3px 7px;line-height:1.2}
 .tag.gen{background:var(--ochre-l);color:#7c5b14;border-color:#E8D7A9}
 .bar{height:5px;border-radius:5px;background:var(--line);margin-top:8px;overflow:hidden}
@@ -744,7 +745,7 @@ V.ricette=()=>{
   } else {
     results=`<div class="list">${list.map(x=>card(x.r,"ricetta",{score:x.sc})).join("")}</div>`;
   }
-  return `<div class="sec-head"><div><h2>🍳 Cucina e ricette</h2><p>1. Aggiungi quello che hai in casa · 2. Tocca gli ingredienti per scegliere quali usare · 3. Scegli: <b>Ricettario</b>, <b>Crea</b> (abbinamenti), <b>Cerca online</b> o <b>AI</b> (ricette su misura e consigli). Sale, pepe, olio e acqua si danno per scontati.</p></div><button class="btn ai sm" data-a="askai-sec" data-v="ricette">✨ Chiedi a Rimedia AI</button>${mineAddBtn("ricette")}</div>
+  return `<div class="sec-head"><div><h2>🍳 Cucina e ricette</h2><p>1. Aggiungi quello che hai in casa · 2. Tocca gli ingredienti per scegliere quali usare · 3. Scegli: <b>Ricettario</b>, <b>Crea</b> (abbinamenti), <b>Cerca online</b> o <b>AI</b> (ricette su misura e consigli). Sale, pepe, olio e acqua si danno per scontati.</p></div><button class="btn ai sm" data-a="askai-sec" data-v="ricette">✨ Chiedi a Rimedia AI</button></div>
   <div class="panel"><h3>La mia dispensa</h3>
    <form class="row" id="panForm"><input class="inp" id="panIn" placeholder="Es. zucchine, pane raffermo, uova…"><button class="btn">Aggiungi</button></form>
    <div class="chips">${pantryChips}</div>
@@ -774,7 +775,7 @@ V.spesa=()=>{
   </div>`;
 };
 const HO_EX=["500 g di pane raffermo","bancali","barattoli di vetro","scarti di legno","bucce e scarti vegetali","jeans vecchi","latte in scadenza","rubinetto che gocciola"];
-function secHead(v,title,desc){return `<div class="sec-head"><div><h2>${title}</h2><p>${desc}</p></div><button class="btn ai sm" data-a="askai-sec" data-v="${v}">✨ Chiedi a Rimedia AI</button>${mineAddBtn(v)}</div>`;}
+function secHead(v,title,desc){return `<div class="sec-head"><div><h2>${title}</h2><p>${desc}</p></div><button class="btn ai sm" data-a="askai-sec" data-v="${v}">✨ Chiedi a Rimedia AI</button></div>`;}
 function filterChips(key,map,list,field){
   const cur=filt[key]||"tutti";const n=k=>list.filter(x=>x[field]===k).length;
   return `<div class="filters"><button class="chip ${cur==="tutti"?"on":""}" data-a="fset" data-k="${key}" data-v="tutti">Tutti (${list.length})</button>${Object.entries(map).filter(([k])=>n(k)).map(([k,l])=>`<button class="chip ${cur===k?"on":""}" data-a="fset" data-k="${key}" data-v="${k}">${esc(l)} (${n(k)})</button>`).join("")}</div>`;
@@ -787,6 +788,7 @@ V.home=()=>{
   <div class="bigsearch"><h3>🔎 Ho… cosa posso farne?</h3><p>Scrivi cosa possiedi o vuoi recuperare: un alimento, un materiale, un oggetto, uno scarto o un problema da risolvere.</p>
    <form class="row" id="hoHome"><input class="inp" id="hoHomeIn" placeholder="Es. pane raffermo, bancali, barattoli di vetro…" autocomplete="off"><button class="btn">Trova</button></form>
    <div class="chips">${HO_EX.map(x=>`<button class="chip" data-a="hoex" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>
+  <div class="panel mineHome"><div><h3>✍️ Le tue idee</h3><div class="aihint">Scrivi o importa una ricetta, una guida, un'idea di riciclo, una soluzione o un appunto, con l'icona che preferisci.</div></div><button class="btn" data-a="mnew" data-k="">✍️ Aggiungi la mia idea</button></div>
   <div class="grid">${SECTIONS.map(s=>`<a class="tile" href="#${s.v}"><div class="vis ${s.c}" aria-hidden="true">${s.e}</div><span class="cnt">${s.list().length}</span><div class="tb"><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p></div></a>`).join("")}
    <a class="tile" href="#spesa"><div class="vis c-sage" aria-hidden="true">🧺</div><div class="tb"><h3>Lista della spesa</h3><p>Dal piano dei pasti, senza ricomprare ciò che hai.</p></div></a></div>
   <div class="stat"><a href="#ricette"><b>${nPan}</b><span>ingredienti in dispensa</span></a><a href="#spesa"><b>${nShop}</b><span>cose da comprare</span></a><a href="#quaderno"><b>${nFav}</b><span>salvati nel quaderno</span></a><a href="#quaderno" data-a="fset" data-k="qd" data-v="mie"><b>${(S.mine||[]).length}</b><span>idee e appunti tuoi</span></a></div>
@@ -1707,6 +1709,6 @@ render();
   }catch(e){}
 })();
 </script>
-<script src="aggiornamenti.js" data-version="2.1.0"></script>
+<script src="aggiornamenti.js" data-version="2.1.1"></script>
 </body>
 </html>
