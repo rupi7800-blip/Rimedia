@@ -1,7 +1,8 @@
 {
-  "version": "2.2.0",
+  "version": "2.2.1",
   "date": "15/11/2026",
   "notes": [
-    "Nuovo: collegamento con AI Command Center (Profilo → Command Center). L'agente può leggere dispensa, spesa, piano e preferiti e aggiungere prodotti alla spesa"
+    "Su computer tutte le sezioni (anche Quaderno e Profilo) sono visibili in alto, su più righe se serve",
+    "Nuovo: collegamento con AI Command Center (Profilo → Command Center)"
   ]
 }
