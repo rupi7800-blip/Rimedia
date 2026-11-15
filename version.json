@@ -1,10 +1,10 @@
 {
-  "version": "2.0.0",
-  "date": "14/11/2026",
+  "version": "2.1.0",
+  "date": "15/11/2026",
   "notes": [
-    "Nuova grafica con colori naturali, barra di ricerca sempre visibile e menù in basso su smartphone",
-    "Contenuti raddoppiati in ogni sezione e nuove sezioni Orto e giardino e Risparmio e autonomia",
-    "Rimedia AI in ogni scheda e sezione, con lo stesso sistema di Garden Manager (Gemini, Groq, OpenRouter, Claude e altri, con servizi di riserva)",
-    "Ricerca intelligente, ricerca inversa “Ho… cosa posso farne?”, profilo personale, cronologia e risposte AI salvabili nel quaderno"
+    "Le mie idee: scrivi o importa le tue ricette, guide di autoproduzione, riciclo, bricolage, orto, risparmio, tisane e soluzioni “cosa ne faccio”, scegliendo l'icona",
+    "Appunti liberi nel quaderno",
+    "Importazione da testo incollato, da file (.txt, .md, .json) o con Rimedia AI che compila i campi",
+    "“Copia e modifica” su ogni scheda e “Trasforma in mia idea” sulle risposte dell'AI; esportazione e importazione delle tue idee"
   ]
 }

@@ -116,6 +116,8 @@ details.rmore,details.quick{margin-top:12px}details summary{cursor:pointer;color
 .tag{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
 .tag.good{background:var(--sage-l);color:var(--forest);border-color:#CFDCC6}
 .tag.ai{background:var(--sage-l);color:var(--forest);border-color:#CFDCC6}
+.tag.mine{background:var(--earth-l);color:#5e4630;border-color:#E0CFB6}
+.chips.emo .chip{font-size:20px;padding:3px 7px;line-height:1.2}
 .tag.gen{background:var(--ochre-l);color:#7c5b14;border-color:#E8D7A9}
 .bar{height:5px;border-radius:5px;background:var(--line);margin-top:8px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--sage)}
@@ -264,6 +266,7 @@ a.linkcard{display:block;text-decoration:none;color:inherit}
 <script src="contenuti/tisane.js"></script>
 <script src="contenuti/orto.js"></script>
 <script src="contenuti/risparmio.js"></script>
+<script src="js/mie-idee.js"></script>
 <script>
 /* ================= DATI ================= */
 const STAPLES=["sale","pepe","olio","olio extravergine","acqua"];
@@ -566,20 +569,20 @@ const CATS={
  risp:{acqua:"Acqua",energia:"Energia",sprechi:"Meno sprechi",manutenzione:"Manutenzione preventiva",spese:"Spese di casa"}
 };
 const SECTIONS=[
- {v:"ricette",kind:"ricetta",n:"Cucina e ricette",e:"🍳",c:"c-terra",d:"Avanzi, pane raffermo, scarti, conserve, fermentazioni, ricette economiche.",list:()=>RICETTE},
- {v:"casa",kind:"casa",n:"Autoproduzione",e:"🧴",c:"c-sky",d:"Detergenti, cosmetici semplici, saponi e oggetti di uso quotidiano.",list:()=>CASA},
- {v:"riciclo",kind:"riciclo",n:"Riciclo e recupero",e:"♻️",c:"c-sage",d:"Plastica, vetro, legno, tessuti, mobili, elettrici, materiali edili.",list:()=>RICICLO},
- {v:"bricolage",kind:"brico",n:"Bricolage e riparazioni",e:"🔧",c:"c-ochre",d:"Ripara invece di sostituire: mobili, casa, attrezzi, manutenzione.",list:()=>BRICO},
- {v:"orto",kind:"orto",n:"Orto e giardino",e:"🌱",c:"c-forest",d:"Compost, acqua piovana, semi, strutture, difesa naturale.",list:()=>ORTO},
- {v:"risparmio",kind:"risp",n:"Risparmio e autonomia",e:"💶",c:"c-earth",d:"Acqua, energia, sprechi, manutenzione preventiva, spese.",list:()=>RISP},
- {v:"tisane",kind:"tisana",n:"Tisane",e:"🌿",c:"c-plum",d:"Erbe semplici e bucce di recupero, con timer d'infusione.",list:()=>TISANE}
+ {v:"ricette",kind:"ricetta",n:"Cucina e ricette",e:"🍳",c:"c-terra",d:"Avanzi, pane raffermo, scarti, conserve, fermentazioni, ricette economiche.",list:()=>mine("ricetta").concat(RICETTE)},
+ {v:"casa",kind:"casa",n:"Autoproduzione",e:"🧴",c:"c-sky",d:"Detergenti, cosmetici semplici, saponi e oggetti di uso quotidiano.",list:()=>mine("casa").concat(CASA)},
+ {v:"riciclo",kind:"riciclo",n:"Riciclo e recupero",e:"♻️",c:"c-sage",d:"Plastica, vetro, legno, tessuti, mobili, elettrici, materiali edili.",list:()=>mine("riciclo").concat(RICICLO)},
+ {v:"bricolage",kind:"brico",n:"Bricolage e riparazioni",e:"🔧",c:"c-ochre",d:"Ripara invece di sostituire: mobili, casa, attrezzi, manutenzione.",list:()=>mine("brico").concat(BRICO)},
+ {v:"orto",kind:"orto",n:"Orto e giardino",e:"🌱",c:"c-forest",d:"Compost, acqua piovana, semi, strutture, difesa naturale.",list:()=>mine("orto").concat(ORTO)},
+ {v:"risparmio",kind:"risp",n:"Risparmio e autonomia",e:"💶",c:"c-earth",d:"Acqua, energia, sprechi, manutenzione preventiva, spese.",list:()=>mine("risp").concat(RISP)},
+ {v:"tisane",kind:"tisana",n:"Tisane",e:"🌿",c:"c-plum",d:"Erbe semplici e bucce di recupero, con timer d'infusione.",list:()=>mine("tisana").concat(TISANE)}
 ];
 const SEC_BY_KIND=Object.fromEntries(SECTIONS.map(s=>[s.kind,s]));
 const SEC_BY_V=Object.fromEntries(SECTIONS.map(s=>[s.v,s]));
 
 /* ================= STATO ================= */
-let S={pantry:[],unsel:[],shopping:[],plan:[],favs:[],hist:[],prof:{},prefs:{hist:true}};
-function fixS(){["pantry","unsel","shopping","plan","favs","hist"].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});if(!S.prof||typeof S.prof!=="object")S.prof={};S.prefs=Object.assign({hist:true},S.prefs||{});}
+let S={pantry:[],unsel:[],shopping:[],plan:[],favs:[],hist:[],mine:[],prof:{},prefs:{hist:true}};
+function fixS(){["pantry","unsel","shopping","plan","favs","hist","mine"].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});if(!S.prof||typeof S.prof!=="object")S.prof={};S.prefs=Object.assign({hist:true},S.prefs||{});}
 let db=null, dref=null, sampleFn=null, saveT=null, aiCache={};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -619,6 +622,7 @@ function card(it,kind,opts={}){
   const isFav=S.favs.some(f=>f.it.id===it.id);
   let meta=[];
   if(it.ai)meta.push('<span class="tag ai">✦ AI</span>');
+  if(it.mine)meta.push('<span class="tag mine">✍️ Mia idea</span>');
   if(it.gen)meta.push(`<span class="tag gen">🧪 Creata ${esc(it.stars||"")}</span>`);
   if(it.src)meta.push(`<span class="tag">${esc(it.src)}</span>`);
   if(it.time)meta.push(`<span class="tag">⏱ ${esc(it.time)}</span>`);
@@ -647,7 +651,8 @@ function card(it,kind,opts={}){
    ${it.varianti&&it.varianti.length?`<h4>Varianti e sostituzioni</h4><ul class="adv">${it.varianti.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>`:""}
    ${it.avanzi?`<div class="note tip">🥡 <b>Avanzi:</b> ${esc(it.avanzi)}</div>`:""}${it.nutrizione?`<div class="note info">📊 <b>Valori indicativi:</b> ${esc(it.nutrizione)}</div>`:""}
    ${it.tip?`<div class="note tip">💡 ${esc(it.tip)}</div>`:""}${it.res?`<div class="note tip">🎯 <b>Risultato atteso:</b> ${esc(it.res)}</div>`:""}${it.warn?`<div class="note warn">⚠️ <b>Precauzioni:</b> ${esc(it.warn)}</div>`:""}
-   <div class="acts">${acts}${it.url?`<a class="btn sm sec" href="${esc(it.url)}" target="_blank" rel="noopener">Apri fonte ↗</a>`:""}${it.yt?`<a class="btn sm sec" href="${esc(it.yt)}" target="_blank" rel="noopener">▶ Video</a>`:""}</div></div></div>`;
+   ${it.note?`<div class="note info">📝 <b>Note personali:</b> ${esc(it.note)}</div>`:""}
+   <div class="acts">${acts}${mineActs(it)}${it.url?`<a class="btn sm sec" href="${esc(it.url)}" target="_blank" rel="noopener">Apri fonte ↗</a>`:""}${it.yt?`<a class="btn sm sec" href="${esc(it.yt)}" target="_blank" rel="noopener">▶ Video</a>`:""}</div></div></div>`;
 }
 function riciCard(it,opts={}){
   REG[it.id]={it,kind:"riciclo"};
@@ -655,12 +660,12 @@ function riciCard(it,opts={}){
   const link=it.link||it.bri;
   let linkBtn="";
   if(link){const tgt=[...RICETTE,...CASA,...BRICO].find(x=>x.id===link);if(tgt){const v=RICETTE.includes(tgt)?"ricette":CASA.includes(tgt)?"casa":"bricolage";linkBtn=`<button class="btn sm sec" data-a="goto" data-v="${v}" data-id="${tgt.id}">→ ${esc(tgt.t)}</button>`;}}
-  const meta=[];if(it.ai)meta.push('<span class="tag ai">✦ AI</span>');if(it.mat&&CATS.riciclo[it.mat])meta.push(`<span class="tag">${esc(CATS.riciclo[it.mat])}</span>`);if(opts.sec)meta.push('<span class="tag">♻️ Riciclo e recupero</span>');
+  const meta=[];if(it.ai)meta.push('<span class="tag ai">✦ AI</span>');if(it.mine)meta.push('<span class="tag mine">✍️ Mia idea</span>');if(it.mat&&CATS.riciclo[it.mat])meta.push(`<span class="tag">${esc(CATS.riciclo[it.mat])}</span>`);if(opts.sec)meta.push('<span class="tag">♻️ Riciclo e recupero</span>');
   return `<div class="card" id="cd-${it.id}"><div class="hd" data-a="toggle"><div class="em c-sage">${esc(it.e||"♻️")}</div><div class="tt"><h3>${esc(it.t)}</h3><div class="sub">${(it.ideas||[]).length} idee per una seconda vita</div><div class="meta">${meta.join("")}</div></div><span class="chev" aria-hidden="true">▾</span></div>
   <div class="bd"><h4>Idee</h4><ol class="steps">${(it.ideas||[]).map(i=>`<li>${esc(i)}</li>`).join("")}</ol>
   ${it.warn?`<div class="note warn">⚠️ <b>Precauzioni:</b> ${esc(it.warn)}</div>`:""}
-  ${it.disp?`<div class="note info">🗑️ <b>Se proprio va buttato:</b> ${esc(it.disp)}</div>`:""}
-  <div class="acts">${aiBtn(it.id)}<button class="btn sm sec" data-a="fav" data-id="${it.id}">${isFav?"★ Salvato":"☆ Salva"}</button>${linkBtn}</div></div></div>`;
+  ${it.disp?`<div class="note info">🗑️ <b>Se proprio va buttato:</b> ${esc(it.disp)}</div>`:""}${it.note?`<div class="note info">📝 <b>Note personali:</b> ${esc(it.note)}</div>`:""}
+  <div class="acts">${aiBtn(it.id)}<button class="btn sm sec" data-a="fav" data-id="${it.id}">${isFav?"★ Salvato":"☆ Salva"}</button>${linkBtn}${mineActs(it)}</div></div></div>`;
 }
 function aiAnsCard(it){
   REG[it.id]={it,kind:"airisp"};
@@ -669,7 +674,7 @@ function aiAnsCard(it){
   <div class="bd"><div class="ctxbox"><b>Domanda:</b> ${esc(it.q)}</div><div class="note tip">${md(it.a)}</div>
   <div class="acts"><button class="btn sm aiq" data-a="askai" data-id="${it.id}">✨ Continua con Rimedia AI</button><button class="btn sm sec" data-a="fav" data-id="${it.id}">★ Rimuovi dal quaderno</button></div></div></div>`;
 }
-function anyCard(it,kind,opts={}){return kind==="riciclo"?riciCard(it,opts):kind==="airisp"?aiAnsCard(it):card(it,kind,Object.assign(kind==="ricetta"?{score:score(it)}:{},opts));}
+function anyCard(it,kind,opts={}){return kind==="ho"?hoCard(it):kind==="nota"?notaCard(it):kind==="riciclo"?riciCard(it,opts):kind==="airisp"?aiAnsCard(it):card(it,kind,Object.assign(kind==="ricetta"?{score:score(it)}:{},opts));}
 
 /* ================= AI: PROPOSTE GENERATE PER SEZIONE ================= */
 const SCHEMA_STD=`Rispondi SOLO con JSON valido, senza testo prima o dopo, con questa forma:
@@ -721,7 +726,7 @@ const V={};
 V.ricette=()=>{
   const tags=["tutte","pane","avanzi","scarti","frutta","legumi","conserve","fermentati","essiccati","salse","brodi","autoprodotti","economiche","dolce","freddo","vegano","vegetariano"];
   const sel=selected();
-  let list=RICETTE.map(r=>({r,sc:score(r)}));
+  let list=SEC_BY_V.ricette.list().map(r=>({r,sc:score(r)}));
   if(filt.ric!=="tutte")list=list.filter(x=>x.r.tag.includes(filt.ric));
   list.sort((a,b)=>b.sc-a.sc);
   const pantryChips=S.pantry.map((p,i)=>`<span class="chip ${isSel(p)?"on":"off"}" data-a="selpan" data-v="${esc(p)}">${isSel(p)?"✓ ":""}${esc(p)} <x data-a="unpan" data-i="${i}">×</x></span>`).join("")||'<span class="aihint">Dispensa vuota: aggiungi gli ingredienti che hai.</span>';
@@ -739,7 +744,7 @@ V.ricette=()=>{
   } else {
     results=`<div class="list">${list.map(x=>card(x.r,"ricetta",{score:x.sc})).join("")}</div>`;
   }
-  return `<div class="sec-head"><div><h2>🍳 Cucina e ricette</h2><p>1. Aggiungi quello che hai in casa · 2. Tocca gli ingredienti per scegliere quali usare · 3. Scegli: <b>Ricettario</b>, <b>Crea</b> (abbinamenti), <b>Cerca online</b> o <b>AI</b> (ricette su misura e consigli). Sale, pepe, olio e acqua si danno per scontati.</p></div><button class="btn ai sm" data-a="askai-sec" data-v="ricette">✨ Chiedi a Rimedia AI</button></div>
+  return `<div class="sec-head"><div><h2>🍳 Cucina e ricette</h2><p>1. Aggiungi quello che hai in casa · 2. Tocca gli ingredienti per scegliere quali usare · 3. Scegli: <b>Ricettario</b>, <b>Crea</b> (abbinamenti), <b>Cerca online</b> o <b>AI</b> (ricette su misura e consigli). Sale, pepe, olio e acqua si danno per scontati.</p></div><button class="btn ai sm" data-a="askai-sec" data-v="ricette">✨ Chiedi a Rimedia AI</button>${mineAddBtn("ricette")}</div>
   <div class="panel"><h3>La mia dispensa</h3>
    <form class="row" id="panForm"><input class="inp" id="panIn" placeholder="Es. zucchine, pane raffermo, uova…"><button class="btn">Aggiungi</button></form>
    <div class="chips">${pantryChips}</div>
@@ -769,7 +774,7 @@ V.spesa=()=>{
   </div>`;
 };
 const HO_EX=["500 g di pane raffermo","bancali","barattoli di vetro","scarti di legno","bucce e scarti vegetali","jeans vecchi","latte in scadenza","rubinetto che gocciola"];
-function secHead(v,title,desc){return `<div class="sec-head"><div><h2>${title}</h2><p>${desc}</p></div><button class="btn ai sm" data-a="askai-sec" data-v="${v}">✨ Chiedi a Rimedia AI</button></div>`;}
+function secHead(v,title,desc){return `<div class="sec-head"><div><h2>${title}</h2><p>${desc}</p></div><button class="btn ai sm" data-a="askai-sec" data-v="${v}">✨ Chiedi a Rimedia AI</button>${mineAddBtn(v)}</div>`;}
 function filterChips(key,map,list,field){
   const cur=filt[key]||"tutti";const n=k=>list.filter(x=>x[field]===k).length;
   return `<div class="filters"><button class="chip ${cur==="tutti"?"on":""}" data-a="fset" data-k="${key}" data-v="tutti">Tutti (${list.length})</button>${Object.entries(map).filter(([k])=>n(k)).map(([k,l])=>`<button class="chip ${cur===k?"on":""}" data-a="fset" data-k="${key}" data-v="${k}">${esc(l)} (${n(k)})</button>`).join("")}</div>`;
@@ -784,21 +789,21 @@ V.home=()=>{
    <div class="chips">${HO_EX.map(x=>`<button class="chip" data-a="hoex" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>
   <div class="grid">${SECTIONS.map(s=>`<a class="tile" href="#${s.v}"><div class="vis ${s.c}" aria-hidden="true">${s.e}</div><span class="cnt">${s.list().length}</span><div class="tb"><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p></div></a>`).join("")}
    <a class="tile" href="#spesa"><div class="vis c-sage" aria-hidden="true">🧺</div><div class="tb"><h3>Lista della spesa</h3><p>Dal piano dei pasti, senza ricomprare ciò che hai.</p></div></a></div>
-  <div class="stat"><a href="#ricette"><b>${nPan}</b><span>ingredienti in dispensa</span></a><a href="#spesa"><b>${nShop}</b><span>cose da comprare</span></a><a href="#quaderno"><b>${nFav}</b><span>salvati nel quaderno</span></a></div>
+  <div class="stat"><a href="#ricette"><b>${nPan}</b><span>ingredienti in dispensa</span></a><a href="#spesa"><b>${nShop}</b><span>cose da comprare</span></a><a href="#quaderno"><b>${nFav}</b><span>salvati nel quaderno</span></a><a href="#quaderno" data-a="fset" data-k="qd" data-v="mie"><b>${(S.mine||[]).length}</b><span>idee e appunti tuoi</span></a></div>
   ${RAI.hasAI()?"":`<div class="note info">✨ <b>Rimedia AI</b> è presente in ogni scheda e in ogni sezione. Per attivarla collega un servizio gratuito (Google Gemini o Groq) in <a href="#ai-setup">Impostazioni AI</a>.</div>`}
   <div class="quote">«Nulla si crea, nulla si distrugge, tutto si trasforma.»<small>Antoine Lavoisier</small></div>`;
 };
 V.casa=()=>{
-  const list=byCat(CASA,"casa","cat");
+  const all=SEC_BY_V.casa.list(),list=byCat(all,"casa","cat");
   return `${secHead("casa","🧴 Autoproduzione","Detergenti, cosmetici semplici, saponi e oggetti di uso quotidiano: pochi ingredienti di base e meno flaconi da buttare.")}
   <div class="note warn"><b>Regole d'oro:</b> mai mescolare candeggina con aceto, acido citrico o ammoniaca (gas tossici). Etichetta ogni contenitore con nome e data. Tieni tutto lontano da bambini e animali. Per i cosmetici fai una prova su una piccola zona di pelle.</div>
   <div class="note info"><b>Dispensa base:</b> aceto bianco, bicarbonato, acido citrico, percarbonato, sapone di Marsiglia, soda Solvay, alcol etilico, cera d'api, burro di karité. Con questi fai quasi tutto.</div>
-  ${filterChips("casa",CATS.casa,CASA,"cat")}
+  ${filterChips("casa",CATS.casa,all,"cat")}
   <div class="list">${list.map(x=>card(x,"casa")).join("")}</div>
   ${aiBlock("casa","Es. detersivo per pavimenti in parquet, deodorante delicato…","Crea ricetta")}`;
 };
 function riciFiltered(){
-  const q=norm(filt.rici);let list=byCat(RICICLO,"rmat","mat");
+  const q=norm(filt.rici);let list=byCat(SEC_BY_V.riciclo.list(),"rmat","mat");
   if(q)list=list.filter(x=>norm(x.t+" "+x.kw+" "+(x.ideas||[]).join(" ")).includes(q)||q.split(" ").some(w=>w.length>3&&norm(x.t+" "+x.kw).includes(stem(w))));
   return list;
 }
@@ -806,38 +811,38 @@ V.riciclo=()=>{
   const list=riciFiltered();
   return `${secHead("riciclo","♻️ Riciclo e recupero","Prima di buttare, chiediti: si può riusare? Idee per oggetti e materiali, dalla plastica ai materiali da demolizione, e come smaltirli bene se proprio non servono più.")}
   <div class="panel"><div class="row"><input class="inp" id="riciQ" placeholder="Cerca: barattoli, jeans, pallet, piastrelle…" value="${esc(filt.rici)}"></div></div>
-  ${filterChips("rmat",CATS.riciclo,RICICLO,"mat")}
+  ${filterChips("rmat",CATS.riciclo,SEC_BY_V.riciclo.list(),"mat")}
   <div class="list" id="riciList">${list.map(x=>riciCard(x)).join("")||'<div class="empty">Nessuna voce trovata: chiedi a Rimedia AI qui sotto.</div>'}</div>
   ${aiBlock("riciclo","Es. vecchia scala in legno, ombrello rotto, capsule caffè…","Trova idee")}`;
 };
 V.bricolage=()=>{
-  const list=byCat(BRICO,"brico","cat");
+  const all=SEC_BY_V.bricolage.list(),list=byCat(all,"brico","cat");
   return `${secHead("bricolage","🔧 Bricolage e riparazioni","Riparare costa meno e allunga la vita delle cose. Guide passo passo con attrezzi, materiali, tempi, difficoltà e rischi.")}
   <div class="note warn">Impianti elettrici e gas, caldaie, interventi strutturali e materiali con possibile amianto: rivolgiti sempre a un professionista abilitato.</div>
-  ${filterChips("brico",CATS.brico,BRICO,"cat")}
+  ${filterChips("brico",CATS.brico,all,"cat")}
   <div class="list">${list.map(x=>card(x,"brico")).join("")}</div>
   ${aiBlock("bricolage","Descrivi il problema: es. piastrella che si muove, tapparella bloccata…","Aiutami")}`;
 };
 V.orto=()=>{
-  const list=byCat(ORTO,"orto","cat");
+  const all=SEC_BY_V.orto.list(),list=byCat(all,"orto","cat");
   return `${secHead("orto","🌱 Orto e giardino","Compostaggio, recupero degli scarti verdi, fertilizzanti fatti in casa, acqua piovana, semi, strutture con materiali di recupero e difesa naturale.")}
   <div class="note info">Ogni guida privilegia materiali di recupero e metodi a basso impatto. Nessun pesticida chimico: per problemi gravi o organismi da quarantena rivolgiti al Servizio fitosanitario regionale.</div>
-  ${filterChips("orto",CATS.orto,ORTO,"cat")}
+  ${filterChips("orto",CATS.orto,all,"cat")}
   <div class="list">${list.map(x=>card(x,"orto")).join("")}</div>
   ${aiBlock("orto","Es. come recupero l'acqua del condizionatore, cosa coltivo in cassette…","Suggerisci")}`;
 };
 V.risparmio=()=>{
-  const list=byCat(RISP,"risp","cat");
+  const all=SEC_BY_V.risparmio.list(),list=byCat(all,"risp","cat");
   return `${secHead("risparmio","💶 Risparmio e autonomia","Meno sprechi d'acqua, energia e cibo, manutenzione preventiva e spese sotto controllo. I risparmi indicati sono stime: dipendono da tariffe e abitudini.")}
-  ${filterChips("risp",CATS.risp,RISP,"cat")}
+  ${filterChips("risp",CATS.risp,all,"cat")}
   <div class="list">${list.map(x=>card(x,"risp")).join("")}</div>
   ${aiBlock("risparmio","Es. come ridurre la bolletta della luce in un bilocale…","Consigliami")}`;
 };
 V.tisane=()=>{
-  let list=TISANE;if(filt.tis!=="tutte")list=list.filter(x=>x.goal===filt.tis);
+  const all=SEC_BY_V.tisane.list();let list=all;if(filt.tis!=="tutte")list=list.filter(x=>x.goal===filt.tis);
   return `${secHead("tisane","🌿 Tisane","Erbe semplici, bucce di recupero e un timer per l'infusione giusta.")}
   <div class="note info">Le tisane non sostituiscono cure mediche. In gravidanza, allattamento o se assumi farmaci, chiedi al medico o al farmacista: alcune erbe (es. iperico, liquirizia, ginkgo) interagiscono con i farmaci.</div>
-  <div class="filters"><button class="chip ${filt.tis==="tutte"?"on":""}" data-a="ftis" data-v="tutte">Tutte (${TISANE.length})</button>${Object.entries(GOALS).map(([k,l])=>`<button class="chip ${filt.tis===k?"on":""}" data-a="ftis" data-v="${k}">${l} (${TISANE.filter(x=>x.goal===k).length})</button>`).join("")}</div>
+  <div class="filters"><button class="chip ${filt.tis==="tutte"?"on":""}" data-a="ftis" data-v="tutte">Tutte (${all.length})</button>${Object.entries(GOALS).map(([k,l])=>`<button class="chip ${filt.tis===k?"on":""}" data-a="ftis" data-v="${k}">${l} (${all.filter(x=>x.goal===k).length})</button>`).join("")}</div>
   <div class="list">${list.map(x=>card(x,"tisana")).join("")}</div>
   ${aiBlock("tisane","Es. qualcosa di caldo per il dopo allenamento, senza teina…","Suggerisci")}`;
 };
@@ -854,10 +859,10 @@ V.quaderno=()=>{
 let IDX=null;
 function buildIdx(){
   IDX=[];const f=x=>norm(Array.isArray(x)?x.join(" "):(x||""));
-  SECTIONS.forEach(s=>s.list().forEach(it=>{
+  SECTIONS.concat(EXTRA_SECS()).forEach(s=>s.list().forEach(it=>{
     IDX.push({it,s,title:f(it.t),
       main:f([it.s,it.kw,(it.tag||[]).join(" "),catLabel(it,s.kind),it.cat,it.mat&&CATS.riciclo[it.mat],it.goal&&GOALS[it.goal],(it.ing||[]).map(i=>i[0]).join(" "),(it.tools||[]).join(" "),s.n]),
-      body:f([(it.st||[]).join(" "),(it.ideas||[]).join(" "),it.tip,it.warn,(it.varianti||[]).join(" "),it.res,it.disp])});
+      body:f([(it.st||[]).join(" "),(it.ideas||[]).join(" "),it.tip,it.warn,(it.varianti||[]).join(" "),it.res,it.disp,it.body,it.note,it.labels])});
   }));
 }
 const SYN={bancale:"pallet",bancali:"pallet",pedana:"pallet",pedane:"pallet",vasetti:"barattoli",vasetto:"barattoli",barattolo:"barattoli",scarto:"scarti",buccia:"bucce",raffermo:"pane",stantio:"raffermo",bottiglia:"bottiglie",legna:"legno",legname:"legno",tavole:"legno",stoffa:"tessuti",tessuto:"tessuti",vestiti:"magliette",maglietta:"magliette",lattina:"lattine",ferro:"metallo",arrugginito:"ruggine",ruggine:"arrugginiti",perde:"gocciola",gocciolare:"gocciola",cigolio:"cigola",avanzi:"avanzato",avanzata:"avanzato",detersivo:"detergente",concime:"fertilizzante",fertilizzante:"concime",bolletta:"bollette",bollette:"risparmio",risparmiare:"risparmio",mobile:"mobili",sedia:"sedie",elettrodomestico:"elettrodomestici",telefono:"telefoni",cellulare:"telefoni",piastrella:"piastrelle",mattone:"mattoni",calcinacci:"edilizia",demolizione:"demolizione",umido:"compost",organico:"compost",sughero:"tappi",candela:"candele",cera:"candele",scaduto:"scadenza",scade:"scadenza"};
@@ -874,7 +879,7 @@ function searchAll(q,min=1){
   return res;
 }
 function resultsBySection(res,max=40){
-  const by={},order=[];res.slice(0,max).forEach(r=>{if(!by[r.x.s.v]){by[r.x.s.v]=[];order.push(SEC_BY_V[r.x.s.v]);}by[r.x.s.v].push(r.x);});
+  const by={},order=[];res.slice(0,max).forEach(r=>{if(!by[r.x.s.v]){by[r.x.s.v]=[];order.push(r.x.s);}by[r.x.s.v].push(r.x);});
   return order.map(s=>`<h3 class="rgrp">${s.e} ${esc(s.n)} <span>${by[s.v].length}</span></h3><div class="list">${by[s.v].map(x=>anyCard(x.it,s.kind)).join("")}</div>`).join("");
 }
 V.cerca=()=>{
@@ -884,7 +889,7 @@ V.cerca=()=>{
   return `<div class="sec-head"><div><h2>🔎 Cerca</h2><p>Per nome, categoria, materiale, ingrediente, oggetto da recuperare, problema da risolvere o prodotto da autoprodurre.</p></div></div>
   <div class="panel"><form class="row" id="cercaForm"><input class="inp" id="cercaIn" value="${esc(q)}" placeholder="Es. pallet, muffa, yogurt, detersivo, compost…" autocomplete="off"><button class="btn">Cerca</button></form>
   ${!q&&recent.length?`<div class="chips">${recent.map(h=>`<button class="chip" data-a="redo" data-k="cerca" data-v="${esc(h.t)}">🕘 ${esc(h.t)}</button>`).join("")}</div>`:""}</div>
-  ${q?`<div class="filters"><button class="chip ${sec==="tutti"?"on":""}" data-a="fset" data-k="qsec" data-v="tutti">Tutto (${res.length})</button>${SECTIONS.map(s=>[s,res.filter(r=>r.x.s.v===s.v).length]).filter(x=>x[1]).map(([s,n])=>`<button class="chip ${sec===s.v?"on":""}" data-a="fset" data-k="qsec" data-v="${s.v}">${s.e} ${esc(s.n)} (${n})</button>`).join("")}</div>`:""}
+  ${q?`<div class="filters"><button class="chip ${sec==="tutti"?"on":""}" data-a="fset" data-k="qsec" data-v="tutti">Tutto (${res.length})</button>${SECTIONS.concat(EXTRA_SECS()).map(s=>[s,res.filter(r=>r.x.s.v===s.v).length]).filter(x=>x[1]).map(([s,n])=>`<button class="chip ${sec===s.v?"on":""}" data-a="fset" data-k="qsec" data-v="${s.v}">${s.e} ${esc(s.n)} (${n})</button>`).join("")}</div>`:""}
   <div id="results">${q?(shown.length?resultsBySection(shown,60):`<div class="empty">Nessuna scheda trovata per «${esc(q)}».</div>`):""}</div>
   ${q?`<div class="panel aipanel"><h3>✨ Non hai trovato quello che cercavi?</h3><div class="aihint">Rimedia AI riceve la tua ricerca e i risultati trovati.</div><div class="acts"><button class="btn ai" data-a="askai-q">✨ Chiedi a Rimedia AI: «${esc(q.slice(0,50))}»</button></div></div>`:""}`;
 };
@@ -903,7 +908,8 @@ V.ho=()=>{
    <div class="chips">${HO_EX.map(x=>`<button class="chip" data-a="hoex" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div>
    ${mats.length?`<h4 class="mini">Dai tuoi materiali (profilo)</h4><div class="chips">${mats.map(x=>`<button class="chip add" data-a="hoex" data-v="${esc(x)}">+ ${esc(x)}</button>`).join("")}</div>`:""}
    <div class="aihint">Separa più cose con una virgola. Gli alimenti puoi anche metterli in <a href="#ricette">dispensa</a> per trovare ricette con tutto ciò che hai.</div></div>
-  <div id="results">${body}</div>`;
+  <div class="acts"><button class="btn sm sec" data-a="mnew" data-k="ho">✍️ Aggiungi una mia soluzione</button></div>
+  <div id="results">${body||mineHoList()}</div>`;
 };
 /* ================= PROFILO E CRONOLOGIA ================= */
 const LIVELLI=["principiante","intermedio","esperto"],BUDGET=["quasi zero","basso","medio","nessun limite"],TEMPO=["meno di 30 minuti","1–2 ore","mezza giornata","un fine settimana"];
@@ -1338,7 +1344,7 @@ const QUICK_AI={
 function itemText(it,kind){
   const L=[],s=SEC_BY_KIND[kind];
   L.push(`Tipo: ${s?s.n:kind}${catLabel(it,kind)?" › "+catLabel(it,kind):""}${it.mat&&CATS.riciclo[it.mat]?" › "+CATS.riciclo[it.mat]:""}${it.goal&&GOALS[it.goal]?" › "+GOALS[it.goal]:""}`);
-  L.push("Titolo: "+it.t);if(it.s)L.push("Descrizione: "+it.s);
+  L.push("Titolo: "+it.t);if(it.s)L.push("Descrizione: "+it.s);if(it.mine)L.push("(Scheda scritta dall'utente)");if(kind==="ho"&&it.kw)L.push("Cosa ha l'utente: "+it.kw);if(it.body)L.push("Testo:\n"+it.body);if(it.labels)L.push("Etichette: "+it.labels);if(it.note)L.push("Note personali: "+it.note);
   [["Tempo",it.time],["Difficoltà",it.diff],["Infusione",it.min?it.min+" minuti":""],["Costo indicativo",it.cost]].forEach(([k,v])=>{if(v)L.push(k+": "+v);});
   if(it.ing&&it.ing.length)L.push((kind==="ricetta"||kind==="tisana"?"Ingredienti":"Materiali")+": "+it.ing.map(([n,q])=>disp(n)+(q?" ("+q+")":"")).join("; "));
   if(it.tools&&it.tools.length)L.push("Attrezzatura: "+it.tools.join(", "));
@@ -1382,7 +1388,7 @@ function msgHtml(m,i){
   if(m.pending&&!m.content)return `<div class="msg assistant" ${last?'id="shLast"':""}><span class="dot"></span><span class="dot"></span><span class="dot"></span> <small>${esc(m.status||"Rimedia AI sta pensando…")}</small></div>`;
   let ac="";
   if(m.err)ac=(m.code==="nokey"||m.code==="auth")?`<div class="macts"><a class="btn sm sec" href="#ai-setup" data-a="shclose">⚙️ Impostazioni AI</a></div>`:`<div class="macts"><button class="btn sm sec" data-a="shretry">↻ Riprova</button></div>`;
-  else if(!(last&&SH.busy))ac=`<div class="macts"><button class="btn sm sec" data-a="shsave" data-i="${i}">☆ Salva nel quaderno</button><button class="btn sm sec" data-a="shcopy" data-i="${i}">Copia</button>${m.prov?`<small style="color:var(--muted);align-self:center">${esc(m.prov)}</small>`:""}</div>`;
+  else if(!(last&&SH.busy))ac=`<div class="macts"><button class="btn sm sec" data-a="shsave" data-i="${i}">☆ Salva nel quaderno</button><button class="btn sm sec" data-a="shcopy" data-i="${i}">Copia</button><button class="btn sm sec" data-a="shmine" data-i="${i}">✍️ Trasforma in mia idea</button>${m.prov?`<small style="color:var(--muted);align-self:center">${esc(m.prov)}</small>`:""}</div>`;
   return `<div class="msg assistant${m.err?" err":""}" ${last?'id="shLast"':""}>${md(m.content)}${ac}</div>`;
 }
 function paintLast(){const el=$("#shLast");if(el)el.outerHTML=msgHtml(SH.msgs[SH.msgs.length-1],SH.msgs.length-1);const bd=$("#shBd");if(bd)bd.scrollTop=bd.scrollHeight;}
@@ -1549,7 +1555,7 @@ function render(){
   const v=cur();$("#app").innerHTML=V[v]();
   document.querySelectorAll("#nav a,#tabbar a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
   $("#fab").classList.toggle("hide",v==="ai-setup");
-  document.title=v==="home"?"Rimedia — non buttare, trasforma":"Rimedia — "+(({ricette:"Cucina",spesa:"Spesa",casa:"Autoproduzione",riciclo:"Riciclo",bricolage:"Bricolage",orto:"Orto e giardino",risparmio:"Risparmio",tisane:"Tisane",quaderno:"Quaderno",profilo:"Profilo",cerca:"Cerca",ho:"Ho… cosa posso farne?","ai-setup":"Impostazioni AI"})[v]||"");
+  document.title=v==="home"?"Rimedia — non buttare, trasforma":"Rimedia — "+(({ricette:"Cucina",spesa:"Spesa",casa:"Autoproduzione",riciclo:"Riciclo",bricolage:"Bricolage",orto:"Orto e giardino",risparmio:"Risparmio",tisane:"Tisane",quaderno:"Quaderno",profilo:"Profilo",cerca:"Cerca",ho:"Ho… cosa posso farne?","ai-setup":"Impostazioni AI",nuova:"La mia idea"})[v]||"");
   const navOn=document.querySelector("#nav a.on");if(navOn)navOn.scrollIntoView({inline:"center",block:"nearest"});
   ["ricette","casa","bricolage","tisane","riciclo","orto","risparmio"].forEach(k=>{if(aiCache[k])renderAI(k);});
   bindForms();
@@ -1569,6 +1575,7 @@ function findItem(id){return REG[id]||null;}
 function doSearch(v){v=String(v||"").trim();filt.q=v;filt.qsec="tutti";if(v)addHist({type:"cerca",t:v});const hi=$("#hsIn");if(hi){hi.value="";hi.blur();}if(location.hash!=="#cerca")location.hash="cerca";else{render();window.scrollTo(0,0);}}
 function doHo(v){v=String(v||"").trim();filt.ho=v;if(v)addHist({type:"ho",t:v});if(location.hash!=="#ho")location.hash="ho";else{render();const r=$("#results");r&&r.scrollIntoView({behavior:"smooth",block:"start"});}}
 function bindForms(){
+  mieBind();
   const cfm=$("#cercaForm");if(cfm)cfm.onsubmit=e=>{e.preventDefault();doSearch($("#cercaIn").value);};
   const hh=$("#hoHome");if(hh)hh.onsubmit=e=>{e.preventDefault();const v=$("#hoHomeIn").value.trim();if(v)doHo(v);};
   const hf=$("#hoForm");if(hf)hf.onsubmit=e=>{e.preventDefault();doHo($("#hoIn").value);};
@@ -1585,6 +1592,7 @@ function bindForms(){
 document.addEventListener("click",async e=>{
   const el=e.target.closest("[data-a]");if(!el)return;const a=el.dataset.a,id=el.dataset.id;
   if(a==="toggle"){el.closest(".card").classList.toggle("open");return;}
+  if(mieClick(a,el,id))return;
   if(a==="fab"){openAI(ctxSection(cur()));return;}
   if(a==="askai"){openAI(ctxItem(id));return;}
   if(a==="askai-sec"){openAI(ctxSection(el.dataset.v));return;}
@@ -1678,6 +1686,7 @@ function beep(){try{if(!actx)return;[0,.35,.7].forEach(t=>{const o=actx.createOs
 $("#tStop").onclick=()=>{clearInterval(tInt);$("#timer").classList.remove("on");};
 
 /* ================= AVVIO ================= */
+mieInit();
 loadLocal();
 $("#hsForm").onsubmit=e=>{e.preventDefault();const v=$("#hsIn").value.trim();if(v)doSearch(v);};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&SH.open)closeAI();});
@@ -1698,6 +1707,6 @@ render();
   }catch(e){}
 })();
 </script>
-<script src="aggiornamenti.js" data-version="2.0.0"></script>
+<script src="aggiornamenti.js" data-version="2.1.0"></script>
 </body>
 </html>
