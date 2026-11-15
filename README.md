@@ -8,6 +8,7 @@ Web app (PWA statica, senza build) per recupero, riutilizzo, riparazione, trasfo
 |---|---|
 | `index.html` | interfaccia, viste, contenuti originali, motore abbinamenti, ricerca, profilo, quaderno |
 | `contenuti/*.js` | contenuti aggiunti nella versione 2 (ricette, autoproduzione, riciclo, bricolage, tisane, orto, risparmio). I contenuti originali restano in `index.html` e non sono modificati |
+| `js/mie-idee.js` | le idee e gli appunti dell'utente: editor con scelta dell'icona, importazione da testo/file/AI, esportazione |
 | `js/ai-providers.js`, `js/ai.js` | motore AI multi-servizio, stessa architettura di Garden Manager AI |
 | `vendor/anthropic-sdk.js` | SDK ufficiale Claude, caricato solo se si sceglie Claude |
 | `aggiornamenti.js`, `version.json` | avviso di nuova versione |
@@ -22,4 +23,4 @@ Web app (PWA statica, senza build) per recupero, riutilizzo, riparazione, trasfo
 
 ## Dati dell'utente
 
-`localStorage["rimedia"]` (e sincronizzazione quando l'app gira dentro Claude): dispensa, spesa, piano, quaderno (anche risposte AI), profilo, cronologia e preferenze. Esportazione e importazione dal Profilo.
+`localStorage["rimedia"]` (e sincronizzazione quando l'app gira dentro Claude): dispensa, spesa, piano, quaderno (anche risposte AI), idee e appunti dell'utente (`mine`), profilo, cronologia e preferenze. Esportazione e importazione dal Profilo.
